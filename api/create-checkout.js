@@ -29,11 +29,15 @@ export default async function handler(req, res) {
       process.env.STRIPE_SECRET_KEY
     );
 
-    const supabase = createClient(
-      process.env.SUPABASE_URL,
-      process.env.SUPABASE_SECRET_KEY
-    );
+    const supabaseUrl = process.env.SUPABASE_URL?.trim();
 
+console.log("SUPABASE_URL presente:", Boolean(supabaseUrl));
+console.log("SUPABASE_URL valida:", /^https:\/\/[a-z0-9-]+\.supabase\.co$/i.test(supabaseUrl || ""));
+
+const supabase = createClient(
+  supabaseUrl,
+  process.env.SUPABASE_SECRET_KEY
+);
     const session = await stripe.checkout.sessions.create({
       mode: "payment",
       line_items: [
