@@ -1,0 +1,11 @@
+
+{
+  "name": "the-million-dollar-wall",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "@supabase/supabase-js": "^2.57.0",
+    "stripe": "^18.5.0"
+  }
+}
