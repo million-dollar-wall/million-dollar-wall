@@ -455,29 +455,53 @@
             disegnaMuro();
         }
 
-        function confermaEAcquista() {
-            if (!pixelSelezionato) {
-                alert("Seleziona prima un pixel.");
-                return;
-            }
+      
+async function confermaEAcquista() {
+    if (!pixelSelezionato) {
+        alert("Seleziona prima un pixel.");
+        return;
+    }
 
-            const chiave = chiavePixel(
-                pixelSelezionato.x,
-                pixelSelezionato.y
+    const chiave = chiavePixel(
+        pixelSelezionato.x,
+        pixelSelezionato.y
+    );
+
+    if (blocchiVenduti[chiave]) {
+        alert("Questo pixel risulta già occupato.");
+        chiudiPopup();
+        return;
+    }
+
+    try {
+        const risposta = await fetch("/api/create-checkout", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                x: pixelSelezionato.x,
+                y: pixelSelezionato.y,
+                color: selettoreColore.value
+            })
+        });
+
+        const dati = await risposta.json();
+
+        if (!risposta.ok || !dati.url) {
+            alert(
+                dati.error ||
+                "Impossibile avviare il pagamento. Riprova."
             );
+            return;
+        }
 
-            if (blocchiVenduti[chiave]) {
-                alert("Questo pixel risulta già occupato.");
-                chiudiPopup();
-                return;
-            }
-
-            // Salva temporaneamente la selezione prima del reindirizzamento.
-            localStorage.setItem("ultimo_pixel_selezionato", chiave);
-            localStorage.setItem(
-                "ultimo_colore_selezionato",
-                selettoreColore.value
-            );
+        window.location.href = dati.url;
+    } catch (errore) {
+        console.error("Errore pagamento:", errore);
+        alert("Errore di connessione. Riprova tra poco.");
+    }
+}
 
             // IMPORTANTE:
             // Questo semplice link non comunica a Stripe quale pixel
